@@ -11,7 +11,7 @@ const productFinishSchema = mongoose.Schema({
             required: true
         }
     ],
-    product: {
+    productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         required: true

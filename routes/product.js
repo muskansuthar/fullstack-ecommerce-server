@@ -3,8 +3,6 @@ import { Category } from '../models/category.js';
 import { Product } from '../models/product.js';
 import multer from "multer";
 import fs from "fs"
-// import { SubCategory } from '../models/subCat.js';
-import { RecentlyViewed } from '../models/recentlyViewed.js';
 
 
 const router = express.Router()
@@ -149,105 +147,20 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/get/count', async(req, res) => {
-    const productsCount = await Product.countDocuments()
-
-    if(!productsCount){
-        return res.status(500).json({success:false})
-    }
-
-    return res.send({
-        productsCount : productsCount
-    })
-})
-
-router.get('/recentlyViewed', async (req, res) => {
-
-    let productList = [];
-    productList = await RecentlyViewed.find().populate("category")
-    if (!productList) {
-        return res.status(500).json({ success: false })
-    }
-    return res.status(200).json(productList);
-})
-
-router.post('/recentlyViewed', async (req, res) => {
-    let findProduct = await RecentlyViewed.find({ prodId: req.body._id })
-
-    var product;
-
-    if (findProduct.length === 0) {
-        product = new RecentlyViewed({
-            prodId: req.body._id,
-            name: req.body.name,
-            description: req.body.description,
-            images: req.body.images,
-            brand: req.body.brand,
-            price: req.body.price,
-            oldPrice: req.body.oldPrice,
-            catName: req.body.catName,
-            subCatId: req.body.subCatId,
-            category: req.body.category,
-            subCat: req.body.subCat,
-            countInStock: req.body.countInStock,
-            rating: req.body.rating,
-            isFeatured: req.body.isFeatured,
-            discount: req.body.discount,
-            productRam: req.body.productRam,
-            productSize: req.body.productSize,
-            productWeight: req.body.productWeight
-        })
-
-
-        product = await product.save();
-
-        if (!product) {
-            res.status(500).json({
-                error: err,
-                success: false
-            })
-        }
-
-        return res.status(201).json(product)
-    } else {
-        return res.status(200).json({
-            success: true,
-            message: "Product already exists in Recently Viewed",
-        });
-    }
-})
-
 router.post('/create', async (req, res) => {
 
     const category = await Category.findById(req.body.category)
     if (!category) {
         return res.status(404).send("Invalid Category!")
     }
-    // const subCategory = await SubCategory.findById(req.body.subCat)
-    // if (!subCategory) {
-    //     return res.status(404).send("Invalid Sub Category!")
-    // }
-
 
     let product = new Product({
         name: req.body.name,
-        description: req.body.description,
         images: imagesArr,
-        brand: req.body.brand,
         price: req.body.price,
-        oldPrice: req.body.oldPrice,
-        catName: req.body.catName,
-        subCatId: req.body.subCatId,
         category: req.body.category,
-        subCat: req.body.subCat,
-        countInStock: req.body.countInStock,
-        rating: req.body.rating,
         isFeatured: req.body.isFeatured,
-        discount: req.body.discount,
-        productRam: req.body.productRam,
-        productSize: req.body.productSize,
-        productWeight: req.body.productWeight,
-        location: req.body.location !== "" ? req.body.location : "All"
+        productSize: req.body.productSize
     })
 
     product = await product.save();
@@ -331,23 +244,11 @@ router.put('/:id', async (req, res) => {
         req.params.id,
         {
             name: req.body.name,
-            description: req.body.description,
             images: imagesArr,
-            brand: req.body.brand,
             price: req.body.price,
-            oldPrice: req.body.oldPrice,
-            catName: req.body.catName,
-            subCatId: req.body.subCatId,
             category: req.body.category,
-            subCat: req.body.subCat,
-            countInStock: req.body.countInStock,
-            rating: req.body.rating,
             isFeatured: req.body.isFeatured,
-            discount: req.body.discount,
-            productRam: req.body.productRam,
-            productSize: req.body.productSize,
-            productWeight: req.body.productWeight,
-            location: req.body.location
+            productSize: req.body.productSize
         },
         { new: true }
     )

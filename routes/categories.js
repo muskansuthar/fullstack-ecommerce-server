@@ -42,31 +42,6 @@ router.post('/upload', upload.array("images"), async (req, res) => {
     return res.json(imagesArr)
 })
 
-const createCategories = (categories, parentId=null) => {
-    const categoryList = []
-
-    let category;
-
-    if(parentId == null){
-        category = categories.filter((cat) => cat.parentId == undefined)
-    }else{
-        category = categories.filter((cat) => cat.parentId == parentId)
-    }
-
-    for(let cat of category) {
-        categoryList.push({
-            _id : cat._id,
-            name: cat.name,
-            images: cat.images,
-            color: cat.color,
-            slug: cat.slug,
-            children: createCategories(categories, cat._id),
-        })
-    }
-
-    return categoryList
-}
-
 router.get('/', async (req, res) => {
      try {
         const categoryList = await Category.find()
@@ -85,37 +60,6 @@ router.get('/', async (req, res) => {
      } catch (error) {
         return res.status(500).json({success: false})
      }
-})
-
-router.get('/get/count', async(req, res) => {
-    const categoryCount = await Category.countDocuments({parentId:undefined})
-
-    if(!categoryCount){
-        return res.status(500).json({success:false})
-    }
-
-    return res.send({
-        categoryCount : categoryCount
-    })
-})
-
-router.get('/subCat/get/count', async(req, res) => {
-    const categories = await Category.find()
-
-    if(!categories){
-        return res.status(500).json({success:false})
-    }
-
-    const subCatList = []
-    for(let cat of categories){
-        if(cat.parentId!==undefined){
-            subCatList.push(cat)
-        }
-    }
-
-    return res.send({
-        categoryCount : subCatList.length
-    })
 })
 
 router.get('/:id', async (req, res) => {
@@ -189,19 +133,12 @@ router.post('/create', async (req, res) => {
     if(imagesArr.length > 0){
         catObj = {
             name : req.body.name,
-            images : imagesArr,
-            color : req.body.color,
-            slug : req.body.name,
+            images : imagesArr
         }
     }else{
         catObj = {
             name : req.body.name,
-            slug : req.body.name,
         }
-    }
-
-    if(req.body.parentId){
-        catObj.parentId = req.body.parentId
     }
 
     let category = new Category(catObj)
@@ -226,8 +163,7 @@ router.put('/:id', async (req, res) => {
         req.params.id,
         {
             name: req.body.name,
-            images: imagesArr,
-            color: req.body.color
+            images: imagesArr
         },
         { new: true }
     )
